@@ -26,6 +26,10 @@
 |John Doe|Google|01.04.2020|30.09.2020|
 |John Doe|Meta|05.10.2020|19.02.2021|
 
+## Скрипт реализации
+
+[continuous_periods_creation_description.sql](continuous_periods_creation_script.sql)
+
 ## Логика решения
 1. При помощи оконной функции `LAG` определяем дату начала трудоустройства в кождой из компаний по каждому сотруднику, чтобы иметь точку отсчета:</br>`CASE WHEN [Company] = LAG([Company]) OVER (PARTITION BY [Person] ORDER BY [StartDate]) THEN 0 ELSE 1 END`.
 2. Используя в окне функцию `SUM` нарастающим итогом (`ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`), объединяем периоды по вышеописанным правилам:</br>`SUM(employment_start) OVER(PARTITION BY [Person] ORDER BY [start_date] ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`</br>Это работает следующим образом:</br>- Отсчет начинается с единицы, и первый период, соответственно, получает номер "1".</br>- Если следующая строка продолжает данный период, то к единице прибавляется нуль, а значит, номер периода остается прежним.</br>- Если период сменяется, то его номер увеличивается на единицу.
